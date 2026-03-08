@@ -1,0 +1,55 @@
+.row {
+  transition: background-color 0.15s ease;
+
+  &:nth-child(even) {
+    background-color: #fcfcfc;
+  }
+
+  &:hover {
+    background-color: #f1f7ff;
+
+    .sumCell {
+      background-color: #e2e6ea;
+    }
+  }
+}
+
+.sumCell {
+  color: #333;
+
+  font-weight: 700;
+  text-align: center;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  min-width: 60px;
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background-color: #007bff !important;
+    color: white;
+  }
+}
+
+.actionCell {
+  text-align: center;
+  border: 1px solid #dee2e6;
+  background-color: #fff5f5;
+
+  button {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: #dc3545;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
