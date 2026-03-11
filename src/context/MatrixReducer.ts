@@ -38,7 +38,7 @@ export const matrixReducer = (
       newRow = {
         id: crypto.randomUUID(),
         cells: Array.from({ length: state.N }, () => ({
-          id: Math.floor(Math.random() * 1000000),
+          id: crypto.randomUUID(),
           amount: Math.floor(Math.random() * 900) + 100,
         })),
       };

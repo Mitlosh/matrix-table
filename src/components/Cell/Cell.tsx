@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import styles from './Cell.module.scss';
 import type { CellId, CellValue } from '../../types/matrix';
 
@@ -25,6 +25,21 @@ export const Cell = memo(
     onLeave,
   }: Props) => {
     const [isNearest, setIsNearest] = useState(false);
+    const percentValue = rowSum > 0 ? (amount / rowSum) * 100 : 0;
+
+    const intensity = maxInRow > 0 ? amount / maxInRow : 0;
+
+    const style = useMemo(() => {
+      if (!isPercentMode) return undefined;
+
+      const s: React.CSSProperties = {
+        backgroundColor: `rgba(255,152,0,${intensity})`,
+      };
+
+      if (intensity > 0.6) s.color = 'white';
+
+      return s;
+    }, [isPercentMode, intensity]);
 
     useEffect(() => {
       const checkHighlight = (e: CustomEvent) => {
@@ -45,28 +60,17 @@ export const Cell = memo(
         );
     }, [id, isNearest]);
 
-    const heatmapHeight = Math.min(100, Math.round((amount / maxInRow) * 100));
-
-    const percentOfTotal =
-      rowSum > 0 ? ((amount / rowSum) * 100).toFixed(1) : '0';
-
     return (
       <td
         className={`${styles.cell} ${isNearest ? styles.nearest : ''}`}
         onClick={() => onClick(id)}
         onMouseEnter={() => onEnter(id)}
         onMouseLeave={onLeave}
+        style={style}
       >
         <span className={styles.value}>
-          {isPercentMode ? `${percentOfTotal}%` : amount}
+          {isPercentMode ? `${percentValue.toFixed(1)}%` : amount}
         </span>
-
-        {isPercentMode && (
-          <div
-            className={styles.heatmapBar}
-            style={{ height: `${heatmapHeight}%` }}
-          />
-        )}
       </td>
     );
   },

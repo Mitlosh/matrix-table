@@ -37,6 +37,18 @@ export const TableRow = memo(
 
     return (
       <tr className={styles.row}>
+        <td className={styles.actionCell}>
+          <button onClick={() => onRowRemove(row.id)}>x</button>
+        </td>
+
+        <td
+          className={styles.sumCell}
+          onMouseEnter={() => onSumEnter(row.id)}
+          onMouseLeave={onSumLeave}
+        >
+          {rowSum}
+        </td>
+
         {row.cells.map((cell) => (
           <Cell
             key={cell.id}
@@ -60,7 +72,7 @@ export const TableRow = memo(
         </td>
 
         <td className={styles.actionCell}>
-          <button onClick={() => onRowRemove(row.id)}>X</button>
+          <button onClick={() => onRowRemove(row.id)}>x</button>
         </td>
       </tr>
     );

@@ -6,6 +6,7 @@ import {
 import styles from './Table.module.scss';
 import { TableRow } from '../TableRow/TableRow';
 import { useMatrix } from '../../hooks/useMatrix';
+import type { CellId } from '../../types/matrix';
 
 export const Table = () => {
   const { state, dispatch } = useMatrix();
@@ -17,7 +18,7 @@ export const Table = () => {
     const newRows = Array.from({ length: config.m }, () => ({
       id: crypto.randomUUID(),
       cells: Array.from({ length: config.n }, () => ({
-        id: Math.floor(Math.random() * 1000000),
+        id: crypto.randomUUID(),
         amount: generateCellValue(),
       })),
     }));
@@ -42,11 +43,11 @@ export const Table = () => {
   }, [rows, N]);
 
   const handleCellClick = useCallback(
-    (id: number) => dispatch({ type: 'INCREMENT_CELL', cellId: id }),
+    (id: CellId) => dispatch({ type: 'INCREMENT_CELL', cellId: id }),
     [dispatch],
   );
   const handleCellEnter = useCallback(
-    (id: number | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
+    (id: CellId | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
     [dispatch],
   );
   const handleRowRemove = useCallback(
@@ -95,6 +96,8 @@ export const Table = () => {
         <table className={styles.matrixTable}>
           <thead>
             <tr>
+              <th>Action</th>
+              <th>Sum</th>
               {Array.from({ length: N }).map((_, i) => (
                 <th key={i}>{i + 1}</th>
               ))}
@@ -119,7 +122,10 @@ export const Table = () => {
           </tbody>
           <tfoot>
             <tr>
-              <td className={styles.labelCell}>60th %</td>
+              <td colSpan={2} className={styles.labelCell}>
+                60th %
+              </td>
+
               {columnPercentiles.map((val, i) => (
                 <td key={i} className={styles.percentileCell}>
                   {val}
