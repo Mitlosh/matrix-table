@@ -42,29 +42,34 @@ export const Table = () => {
     });
   }, [rows, N]);
 
-  const handleCellClick = useCallback(
+  const incrementCell = useCallback(
     (id: CellId) => dispatch({ type: 'INCREMENT_CELL', cellId: id }),
     [dispatch],
   );
-  const handleCellEnter = useCallback(
-    (id: CellId | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
-    [dispatch],
-  );
-  const handleRowRemove = useCallback(
+
+  const removeRow = useCallback(
     (id: string) => dispatch({ type: 'REMOVE_ROW', rowId: id }),
     [dispatch],
   );
-  const handleSumHover = useCallback(
+
+  const setHoveredCell = useCallback(
+    (id: CellId | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
+    [dispatch],
+  );
+
+  const setHoveredRow = useCallback(
     (id: string | null) => dispatch({ type: 'SET_HOVERED_ROW', rowId: id }),
     [dispatch],
   );
-  const handleCellLeave = useCallback(
-    () => handleCellEnter(null),
-    [handleCellEnter],
+
+  const clearHoveredCell = useCallback(
+    () => setHoveredCell(null),
+    [setHoveredCell],
   );
-  const handleSumHover1 = useCallback(
-    () => handleSumHover(null),
-    [handleSumHover],
+
+  const clearHoveredRow = useCallback(
+    () => setHoveredRow(null),
+    [setHoveredRow],
   );
 
   return (
@@ -111,12 +116,12 @@ export const Table = () => {
                 key={row.id}
                 row={row}
                 isPercentMode={hoveredRowId === row.id}
-                onCellClick={handleCellClick}
-                onCellEnter={handleCellEnter}
-                onCellLeave={handleCellLeave}
-                onRowRemove={handleRowRemove}
-                onSumEnter={handleSumHover}
-                onSumLeave={handleSumHover1}
+                onCellClick={incrementCell}
+                onCellEnter={setHoveredCell}
+                onCellLeave={clearHoveredCell}
+                onRowRemove={removeRow}
+                onSumEnter={setHoveredRow}
+                onSumLeave={clearHoveredRow}
               />
             ))}
           </tbody>
