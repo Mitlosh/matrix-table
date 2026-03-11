@@ -1,16 +1,16 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
   calculate60thPercentile,
-  findNearestCellIds,
   generateCellValue,
 } from '../../utils/matrixHelpers';
 import styles from './Table.module.scss';
 import { TableRow } from '../TableRow/TableRow';
 import { useMatrix } from '../../hooks/useMatrix';
+import type { CellId } from '../../types/matrix';
 
 export const Table = () => {
   const { state, dispatch } = useMatrix();
-  const { rows, M, N, X, hoveredCellId, hoveredRowId } = state;
+  const { rows, M, N, X, hoveredRowId } = state;
 
   const [config, setConfig] = useState({ m: M, n: N, x: X });
 
@@ -18,7 +18,7 @@ export const Table = () => {
     const newRows = Array.from({ length: config.m }, () => ({
       id: crypto.randomUUID(),
       cells: Array.from({ length: config.n }, () => ({
-        id: Math.floor(Math.random() * 1000000),
+        id: crypto.randomUUID(),
         amount: generateCellValue(),
       })),
     }));
@@ -32,17 +32,6 @@ export const Table = () => {
     });
   };
 
-  const nearestIds = useMemo(() => {
-    if (hoveredCellId === null) return [];
-
-    const allCells = rows.flatMap((r) => r.cells);
-    const target = allCells.find((c) => c.id === hoveredCellId);
-
-    if (!target) return [];
-
-    return findNearestCellIds(rows, target.amount, X, hoveredCellId);
-  }, [hoveredCellId, rows, X]);
-
   const columnPercentiles = useMemo(() => {
     if (rows.length === 0) return [];
 
@@ -53,21 +42,34 @@ export const Table = () => {
     });
   }, [rows, N]);
 
-  const handleCellClick = useCallback(
-    (id: number) => dispatch({ type: 'INCREMENT_CELL', cellId: id }),
+  const incrementCell = useCallback(
+    (id: CellId) => dispatch({ type: 'INCREMENT_CELL', cellId: id }),
     [dispatch],
   );
-  const handleCellEnter = useCallback(
-    (id: number | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
-    [dispatch],
-  );
-  const handleRowRemove = useCallback(
+
+  const removeRow = useCallback(
     (id: string) => dispatch({ type: 'REMOVE_ROW', rowId: id }),
     [dispatch],
   );
-  const handleSumHover = useCallback(
+
+  const setHoveredCell = useCallback(
+    (id: CellId | null) => dispatch({ type: 'SET_HOVERED_CELL', cellId: id }),
+    [dispatch],
+  );
+
+  const setHoveredRow = useCallback(
     (id: string | null) => dispatch({ type: 'SET_HOVERED_ROW', rowId: id }),
     [dispatch],
+  );
+
+  const clearHoveredCell = useCallback(
+    () => setHoveredCell(null),
+    [setHoveredCell],
+  );
+
+  const clearHoveredRow = useCallback(
+    () => setHoveredRow(null),
+    [setHoveredRow],
   );
 
   return (
@@ -99,6 +101,8 @@ export const Table = () => {
         <table className={styles.matrixTable}>
           <thead>
             <tr>
+              <th>Action</th>
+              <th>Sum</th>
               {Array.from({ length: N }).map((_, i) => (
                 <th key={i}>{i + 1}</th>
               ))}
@@ -112,19 +116,21 @@ export const Table = () => {
                 key={row.id}
                 row={row}
                 isPercentMode={hoveredRowId === row.id}
-                nearestIds={nearestIds}
-                onCellClick={handleCellClick}
-                onCellEnter={handleCellEnter}
-                onCellLeave={() => handleCellEnter(null)}
-                onRowRemove={handleRowRemove}
-                onSumEnter={handleSumHover}
-                onSumLeave={() => handleSumHover(null)}
+                onCellClick={incrementCell}
+                onCellEnter={setHoveredCell}
+                onCellLeave={clearHoveredCell}
+                onRowRemove={removeRow}
+                onSumEnter={setHoveredRow}
+                onSumLeave={clearHoveredRow}
               />
             ))}
           </tbody>
           <tfoot>
             <tr>
-              <td className={styles.labelCell}>60th %</td>
+              <td colSpan={2} className={styles.labelCell}>
+                60th %
+              </td>
+
               {columnPercentiles.map((val, i) => (
                 <td key={i} className={styles.percentileCell}>
                   {val}

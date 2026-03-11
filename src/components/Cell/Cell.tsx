@@ -1,11 +1,10 @@
-import { memo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import styles from './Cell.module.scss';
 import type { CellId, CellValue } from '../../types/matrix';
 
 interface Props {
   id: CellId;
   amount: CellValue;
-  isNearest: boolean;
   isPercentMode: boolean;
   rowSum: number;
   maxInRow: number;
@@ -18,7 +17,6 @@ export const Cell = memo(
   ({
     id,
     amount,
-    isNearest,
     isPercentMode,
     rowSum,
     maxInRow,
@@ -26,10 +24,41 @@ export const Cell = memo(
     onEnter,
     onLeave,
   }: Props) => {
-    const heatmapHeight = Math.min(100, Math.round((amount / maxInRow) * 100));
+    const [isNearest, setIsNearest] = useState(false);
+    const percentValue = rowSum > 0 ? (amount / rowSum) * 100 : 0;
 
-    const percentOfTotal =
-      rowSum > 0 ? ((amount / rowSum) * 100).toFixed(1) : '0';
+    const intensity = maxInRow > 0 ? amount / maxInRow : 0;
+
+    const style = useMemo(() => {
+      if (!isPercentMode) return undefined;
+
+      const s: React.CSSProperties = {
+        backgroundColor: `rgba(255,152,0,${intensity})`,
+      };
+
+      if (intensity > 0.6) s.color = 'white';
+
+      return s;
+    }, [isPercentMode, intensity]);
+
+    useEffect(() => {
+      const checkHighlight = (e: CustomEvent) => {
+        const isInList = e.detail.nearestIds.includes(id);
+
+        if (isNearest !== isInList) setIsNearest(isInList);
+      };
+
+      window.addEventListener(
+        'matrix-highlight',
+        checkHighlight as EventListener,
+      );
+
+      return () =>
+        window.removeEventListener(
+          'matrix-highlight',
+          checkHighlight as EventListener,
+        );
+    }, [id, isNearest]);
 
     return (
       <td
@@ -37,27 +66,12 @@ export const Cell = memo(
         onClick={() => onClick(id)}
         onMouseEnter={() => onEnter(id)}
         onMouseLeave={onLeave}
+        style={style}
       >
         <span className={styles.value}>
-          {isPercentMode ? `${percentOfTotal}%` : amount}
+          {isPercentMode ? `${percentValue.toFixed(1)}%` : amount}
         </span>
-
-        {isPercentMode && (
-          <div
-            className={styles.heatmapBar}
-            style={{ height: `${heatmapHeight}%` }}
-          />
-        )}
       </td>
-    );
-  },
-  (prev, next) => {
-    return (
-      prev.amount === next.amount &&
-      prev.isNearest === next.isNearest &&
-      prev.isPercentMode === next.isPercentMode &&
-      prev.rowSum === next.rowSum &&
-      prev.maxInRow === next.maxInRow
     );
   },
 );

@@ -18,21 +18,27 @@ export const matrixReducer = (
     case 'INCREMENT_CELL':
       return {
         ...state,
-        rows: state.rows.map((row) => ({
-          ...row,
-          cells: row.cells.map((cell) =>
-            cell.id === action.cellId
-              ? { ...cell, amount: cell.amount + 1 }
-              : cell,
-          ),
-        })),
+        rows: state.rows.map((row) => {
+          if (!row.cells.find((c) => c.id === action.cellId)) {
+            return row;
+          }
+
+          return {
+            ...row,
+            cells: row.cells.map((cell) =>
+              cell.id === action.cellId
+                ? { ...cell, amount: cell.amount + 1 }
+                : cell,
+            ),
+          };
+        }),
       };
 
     case 'ADD_ROW':
       newRow = {
         id: crypto.randomUUID(),
         cells: Array.from({ length: state.N }, () => ({
-          id: Math.floor(Math.random() * 1000000),
+          id: crypto.randomUUID(),
           amount: Math.floor(Math.random() * 900) + 100,
         })),
       };

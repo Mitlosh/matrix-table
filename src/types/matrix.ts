@@ -1,4 +1,4 @@
-export type CellId = number;
+export type CellId = string;
 export type CellValue = number;
 
 export interface Cell {

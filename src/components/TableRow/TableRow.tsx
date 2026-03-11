@@ -6,7 +6,6 @@ import { Cell } from '../Cell/Cell';
 interface Props {
   row: Row;
   isPercentMode: boolean;
-  nearestIds: CellId[];
   onCellClick: (id: CellId) => void;
   onCellEnter: (id: CellId) => void;
   onCellLeave: () => void;
@@ -19,7 +18,6 @@ export const TableRow = memo(
   ({
     row,
     isPercentMode,
-    nearestIds,
     onCellClick,
     onCellEnter,
     onCellLeave,
@@ -39,12 +37,23 @@ export const TableRow = memo(
 
     return (
       <tr className={styles.row}>
+        <td className={styles.actionCell}>
+          <button onClick={() => onRowRemove(row.id)}>x</button>
+        </td>
+
+        <td
+          className={styles.sumCell}
+          onMouseEnter={() => onSumEnter(row.id)}
+          onMouseLeave={onSumLeave}
+        >
+          {rowSum}
+        </td>
+
         {row.cells.map((cell) => (
           <Cell
             key={cell.id}
             id={cell.id}
             amount={cell.amount}
-            isNearest={nearestIds.includes(cell.id)}
             isPercentMode={isPercentMode}
             rowSum={rowSum}
             maxInRow={maxInRow}
@@ -63,7 +72,7 @@ export const TableRow = memo(
         </td>
 
         <td className={styles.actionCell}>
-          <button onClick={() => onRowRemove(row.id)}>X</button>
+          <button onClick={() => onRowRemove(row.id)}>x</button>
         </td>
       </tr>
     );
