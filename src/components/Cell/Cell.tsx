@@ -1,11 +1,10 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import styles from './Cell.module.scss';
 import type { CellId, CellValue } from '../../types/matrix';
 
 interface Props {
   id: CellId;
   amount: CellValue;
-  isNearest: boolean;
   isPercentMode: boolean;
   rowSum: number;
   maxInRow: number;
@@ -18,7 +17,6 @@ export const Cell = memo(
   ({
     id,
     amount,
-    isNearest,
     isPercentMode,
     rowSum,
     maxInRow,
@@ -26,6 +24,27 @@ export const Cell = memo(
     onEnter,
     onLeave,
   }: Props) => {
+    const [isNearest, setIsNearest] = useState(false);
+
+    useEffect(() => {
+      const checkHighlight = (e: CustomEvent) => {
+        const isInList = e.detail.nearestIds.includes(id);
+
+        if (isNearest !== isInList) setIsNearest(isInList);
+      };
+
+      window.addEventListener(
+        'matrix-highlight',
+        checkHighlight as EventListener,
+      );
+
+      return () =>
+        window.removeEventListener(
+          'matrix-highlight',
+          checkHighlight as EventListener,
+        );
+    }, [id, isNearest]);
+
     const heatmapHeight = Math.min(100, Math.round((amount / maxInRow) * 100));
 
     const percentOfTotal =
@@ -49,15 +68,6 @@ export const Cell = memo(
           />
         )}
       </td>
-    );
-  },
-  (prev, next) => {
-    return (
-      prev.amount === next.amount &&
-      prev.isNearest === next.isNearest &&
-      prev.isPercentMode === next.isPercentMode &&
-      prev.rowSum === next.rowSum &&
-      prev.maxInRow === next.maxInRow
     );
   },
 );

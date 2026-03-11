@@ -6,7 +6,6 @@ import { Cell } from '../Cell/Cell';
 interface Props {
   row: Row;
   isPercentMode: boolean;
-  nearestIds: CellId[];
   onCellClick: (id: CellId) => void;
   onCellEnter: (id: CellId) => void;
   onCellLeave: () => void;
@@ -19,7 +18,6 @@ export const TableRow = memo(
   ({
     row,
     isPercentMode,
-    nearestIds,
     onCellClick,
     onCellEnter,
     onCellLeave,
@@ -44,7 +42,6 @@ export const TableRow = memo(
             key={cell.id}
             id={cell.id}
             amount={cell.amount}
-            isNearest={nearestIds.includes(cell.id)}
             isPercentMode={isPercentMode}
             rowSum={rowSum}
             maxInRow={maxInRow}

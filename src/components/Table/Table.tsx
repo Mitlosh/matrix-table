@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
   calculate60thPercentile,
-  findNearestCellIds,
   generateCellValue,
 } from '../../utils/matrixHelpers';
 import styles from './Table.module.scss';
@@ -10,7 +9,7 @@ import { useMatrix } from '../../hooks/useMatrix';
 
 export const Table = () => {
   const { state, dispatch } = useMatrix();
-  const { rows, M, N, X, hoveredCellId, hoveredRowId } = state;
+  const { rows, M, N, X, hoveredRowId } = state;
 
   const [config, setConfig] = useState({ m: M, n: N, x: X });
 
@@ -31,17 +30,6 @@ export const Table = () => {
       X: config.x,
     });
   };
-
-  const nearestIds = useMemo(() => {
-    if (hoveredCellId === null) return [];
-
-    const allCells = rows.flatMap((r) => r.cells);
-    const target = allCells.find((c) => c.id === hoveredCellId);
-
-    if (!target) return [];
-
-    return findNearestCellIds(rows, target.amount, X, hoveredCellId);
-  }, [hoveredCellId, rows, X]);
 
   const columnPercentiles = useMemo(() => {
     if (rows.length === 0) return [];
@@ -68,6 +56,14 @@ export const Table = () => {
   const handleSumHover = useCallback(
     (id: string | null) => dispatch({ type: 'SET_HOVERED_ROW', rowId: id }),
     [dispatch],
+  );
+  const handleCellLeave = useCallback(
+    () => handleCellEnter(null),
+    [handleCellEnter],
+  );
+  const handleSumHover1 = useCallback(
+    () => handleSumHover(null),
+    [handleSumHover],
   );
 
   return (
@@ -112,13 +108,12 @@ export const Table = () => {
                 key={row.id}
                 row={row}
                 isPercentMode={hoveredRowId === row.id}
-                nearestIds={nearestIds}
                 onCellClick={handleCellClick}
                 onCellEnter={handleCellEnter}
-                onCellLeave={() => handleCellEnter(null)}
+                onCellLeave={handleCellLeave}
                 onRowRemove={handleRowRemove}
                 onSumEnter={handleSumHover}
-                onSumLeave={() => handleSumHover(null)}
+                onSumLeave={handleSumHover1}
               />
             ))}
           </tbody>
